@@ -1,19 +1,36 @@
 # Formal Verification Specifications
 
-## Invariants
+## S1-S4 State Invariants
 
-- **Invariant S1:** [Description of invariant S1]
-- **Invariant S2:** [Description of invariant S2]
-- **Invariant S3:** [Description of invariant S3]
-- **Invariant S4:** [Description of invariant S4]
+- **S1:** Invariant 1 description...
+- **S2:** Invariant 2 description...
+- **S3:** Invariant 3 description...
+- **S4:** Invariant 4 description...
 
-## Temporal Properties
+## SH1-SH3 Historical Consistency Invariants
 
-- **Temporal Property T1:** [Description of temporal property T1]
-- **Temporal Property T2:** [Description of temporal property T2]
-- **Temporal Property T3:** [Description of temporal property T3]
+- **SH1:** Historical Consistency Invariant 1 description...
+- **SH2:** Historical Consistency Invariant 2 description...
+- **SH3:** Historical Consistency Invariant 3 description...
 
-## Safety Properties
+## T1-T3 Temporal Properties
 
-- **Safety Property E1:** [Description of safety property E1]
-- **Safety Property E2:** [Description of safety property E2]
+- **T1:** Temporal Property 1 description...
+- **T2:** Temporal Property 2 description...
+- **T3:** Temporal Property 3 description...
+
+## Proofs
+
+Detailed proofs supporting the invariants and properties...
+
+## Code Examples
+
+Examples of code demonstrating the properties...
+
+## Security Theorems
+
+Overview of relevant security theorems...
+
+## Implementation Details
+
+Details on implementation and underlying assumptions...
