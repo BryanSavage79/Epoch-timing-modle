@@ -1,50 +1,47 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.0;
 
 contract DisputeGame {
-    struct Challenge {
+    struct Dispute {
         address challenger;
-        bytes32 epochRoot;
-        uint256 bond;
+        address defender;
+        uint bond;
+        uint defenseWindow;
+        uint resolutionTime;
         bool resolved;
     }
 
-    mapping(bytes32 => Challenge) public challenges;
-    uint256 public totalBond;
+    mapping(uint => Dispute) public disputes;
+    uint public disputeCount;
 
-    event ChallengeCreated(bytes32 indexed epochRoot, address indexed challenger, uint256 bond);
-    event ChallengeResolved(bytes32 indexed epochRoot, bool success);
+    event DisputeCreated(uint disputeId, address challenger, address defender, uint bond);
+    event DisputeResolved(uint disputeId, bool verdict);
 
-    function createChallenge(bytes32 _epochRoot) external payable {
-        require(msg.value > 0, "Bond must be greater than zero.");
+    function createDispute(address defender, uint defenseWindow) public payable {
+        require(msg.value > 0, "Bond must be greater than 0");
 
-        Challenge storage challenge = challenges[_epochRoot];
-        require(challenge.challenger == address(0), "Challenge already exists.");
+        disputeCount++;
+        disputes[disputeCount] = Dispute(msg.sender, defender, msg.value, defenseWindow, block.timestamp + defenseWindow, false);
 
-        challenge.challenger = msg.sender;
-        challenge.epochRoot = _epochRoot;
-        challenge.bond = msg.value;
-        challenge.resolved = false;
-
-        totalBond += msg.value;
-        emit ChallengeCreated(_epochRoot, msg.sender, msg.value);
+        emit DisputeCreated(disputeCount, msg.sender, defender, msg.value);
     }
 
-    function resolveChallenge(bytes32 _epochRoot, bool _success) external {
-        Challenge storage challenge = challenges[_epochRoot];
-        require(challenge.challenger != address(0), "No challenge exists.");
-        require(!challenge.resolved, "Challenge is already resolved.");
+    function resolveDispute(uint disputeId, bool verdict) public {
+        Dispute storage dispute = disputes[disputeId];
+        require(msg.sender == dispute.challenger || msg.sender == dispute.defender, "Not authorized");
+        require(!dispute.resolved, "Dispute has already been resolved");
 
-        challenge.resolved = true;
-        if (_success) {
-            // Logic for successful resolution 
-            // You can return the bond or implement further logic
-            payable(challenge.challenger).transfer(challenge.bond);
+        dispute.resolved = true;
+        if (verdict) {
+            payable(dispute.challenger).transfer(dispute.bond);
         } else {
-            // Logic for unsuccessful resolution 
-            // Bond is forfeited; implement your logic here
+            payable(dispute.defender).transfer(dispute.bond);
         }
-        emit ChallengeResolved(_epochRoot, _success);
+
+        emit DisputeResolved(disputeId, verdict);
+    }
+
+    function isInDefenseWindow(uint disputeId) public view returns (bool) {
+        return block.timestamp < disputes[disputeId].resolutionTime;
     }
 }
