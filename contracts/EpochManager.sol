@@ -1,56 +1,37 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utilities/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract EpochManager is Pausable, Ownable {
-    struct Epoch {
+contract EpochManager is Ownable {
+    enum EpochStatus { Active, Inactive }
+    struct EpochDescriptor {
         uint256 startTime;
         uint256 endTime;
-        bool active;
+        EpochStatus status;
     }
 
-    mapping(uint256 => Epoch) public epochs;
-    uint256 public currentEpochID;
+    mapping(uint256 => EpochDescriptor) public epochs;
+    uint256 public epochCount;
 
-    event EpochCreated(uint256 indexed epochID, uint256 startTime, uint256 endTime);
-    event EpochActivated(uint256 indexed epochID);
-    event EpochDeactivated(uint256 indexed epochID);
+    event EpochCreated(uint256 indexed epochId, uint256 startTime, uint256 endTime);
+    event EpochUpdated(uint256 indexed epochId, EpochStatus status);
 
-    function createEpoch(uint256 _duration) external onlyOwner whenNotPaused {
-        currentEpochID++;
-        uint256 startTime = block.timestamp;
-        uint256 endTime = startTime + _duration;
-
-        epochs[currentEpochID] = Epoch({
-            startTime: startTime,
-            endTime: endTime,
-            active: true
-        });
-
-        emit EpochCreated(currentEpochID, startTime, endTime);
+    function createEpoch(uint256 startTime, uint256 endTime) external onlyOwner {
+        require(startTime < endTime, "Start time must be before end time");
+        epochs[epochCount] = EpochDescriptor(startTime, endTime, EpochStatus.Active);
+        emit EpochCreated(epochCount, startTime, endTime);
+        epochCount++;
     }
 
-    function activateEpoch(uint256 _epochID) external onlyOwner whenPaused {
-        require(epochs[_epochID].active == false, "Epoch is already active.");
-        epochs[_epochID].active = true;
-        emit EpochActivated(_epochID);
-        _unpause();
+    function updateEpoch(uint256 epochId, EpochStatus status) external onlyOwner {
+        require(epochId < epochCount, "Epoch does not exist");
+        epochs[epochId].status = status;
+        emit EpochUpdated(epochId, status);
     }
 
-    function deactivateEpoch(uint256 _epochID) external onlyOwner {
-        require(epochs[_epochID].active == true, "Epoch is already inactive.");
-        epochs[_epochID].active = false;
-        emit EpochDeactivated(_epochID);
-        _pause();
-    }
-
-    function isActive(uint256 _epochID) external view returns (bool) {
-        return epochs[_epochID].active;
-    }
-
-    function currentEpoch() external view returns (Epoch memory) {
-        return epochs[currentEpochID];
+    function getEpochDescriptor(uint256 epochId) external view returns (EpochDescriptor memory) {
+        require(epochId < epochCount, "Epoch does not exist");
+        return epochs[epochId];
     }
 }
