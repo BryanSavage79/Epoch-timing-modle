@@ -1,1 +1,1 @@
-{}
+{"name": "project-name", "version": "1.0.0", "private": true, "scripts": {"test": "hardhat test"}, "devDependencies": {"@nomicfoundation/hardhat-toolbox": "latest", "hardhat": "latest", "chai": "latest", "ethers": "latest", "@openzeppelin/contracts": "latest"}}
